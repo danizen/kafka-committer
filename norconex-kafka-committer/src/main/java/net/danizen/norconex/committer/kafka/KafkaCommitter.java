@@ -100,11 +100,28 @@ public class KafkaCommitter extends AbstractMappedCommitter {
             .getLogger(KafkaCommitter.class);
 
     private String topicName;
+    private String brokerList;
 
     /**
      * Constructor.
      */
     public KafkaCommitter() { }
+
+    public String getTopicName() {
+        return topicName;
+    }
+
+    public void setTopicName(String topicName) {
+        this.topicName = topicName;
+    }
+
+    public String getBrokerList() {
+        return brokerList;
+    }
+
+    public void setBrokerList(String brokerList) {
+        this.brokerList = brokerList;
+    }
 
     @Override
     protected void commitBatch(List<ICommitOperation> batch) {
@@ -118,18 +135,27 @@ public class KafkaCommitter extends AbstractMappedCommitter {
     	    writer.writeStartElement("topicName");
 	        writer.writeCharacters(topicName);
 	        writer.writeEndElement();
+        }
+
+        if (StringUtils.isNotBlank(brokerList)) {
+            writer.writeStartElement("brokerList");
+            writer.writeCharacters(brokerList);
+            writer.writeEndElement();
     	}
     }
 
     @Override
     protected void loadFromXml(XMLConfiguration xml) {
-        throw new CommitterException("Not yet implemented");
+        setTopicName(xml.getString("topicName", null));
+        setBrokerList(xml.getString("brokerList", null));
     }
 
     @Override
     public int hashCode() {
         return new HashCodeBuilder().appendSuper(super.hashCode())
-                .append(topicName).toHashCode();
+                .append(topicName)
+                .append(brokerList)
+                .toHashCode();
     }
 
     @Override
@@ -144,14 +170,18 @@ public class KafkaCommitter extends AbstractMappedCommitter {
             return false;
         }
         KafkaCommitter other = (KafkaCommitter) obj;
-        return new EqualsBuilder().appendSuper(super.equals(obj))
-                .append(topicName, other.topicName).isEquals();
+        return new EqualsBuilder()
+                .appendSuper(super.equals(obj))
+                .append(topicName, other.topicName)
+                .append(brokerList, other.brokerList)
+                .isEquals();
     }
 
     @Override
     public String toString() {
         return new ToStringBuilder(this).appendSuper(super.toString())
                 .append("topicName", topicName)
+                .append("brokerList", brokerList)
                 .toString();
     }
 }

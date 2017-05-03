@@ -24,6 +24,11 @@
         <xs:extension base="AbstractMappedCommitter">
           <xs:all>
             <xs:element name="topicName" type="nonEmptyString" minOccurs="1" maxOccurs="1" />
+            <!-- This is not quite right; it is either brokerLint, zkInit -->
+            <xs:element name="brokerList" type="nonEmptyString"
+              minOccurs="0" maxOccurs="1" />
+            <xs:element name="zookeeperList" type="nonEmptyString"
+              minOccurs="1" maxOccurs="1" />
           </xs:all>
         </xs:extension> 
       </xs:complexContent>
