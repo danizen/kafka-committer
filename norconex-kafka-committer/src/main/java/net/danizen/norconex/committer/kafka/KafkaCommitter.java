@@ -15,6 +15,7 @@
 package net.danizen.norconex.committer.kafka;
 
 import java.io.IOException;
+import java.util.Properties;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,12 +34,15 @@ import org.apache.zookeeper.Watcher;
 import org.apache.zookeeper.WatchedEvent;
 import org.apache.zookeeper.ZooKeeper;
 
+import org.apache.kafka.clients.producer.KafkaProducer;
+import org.apache.kafka.clients.producer.ProducerRecord;
+
 import com.norconex.committer.core.AbstractMappedCommitter;
 import com.norconex.committer.core.CommitterException;
 import com.norconex.committer.core.IAddOperation;
 import com.norconex.committer.core.ICommitOperation;
 import com.norconex.committer.core.IDeleteOperation;
-import com.norconex.commons.lang.map.Properties;
+//import com.norconex.commons.lang.map.Properties;
 
 /**
  * <p>
@@ -103,9 +107,13 @@ public class KafkaCommitter extends AbstractMappedCommitter implements Watcher {
     private static final Logger logger = LogManager
             .getLogger(KafkaCommitter.class);
 
+    private static final String DFLT_KAFKA_SERIALIZER = 
+        "org.apache.kafka.common.serialization.StringSerializer";
+
     private String topicName;
     private String zkConnect;
     private String brokerList;
+    private KafkaProducer<String,String> producer;
 
     /**
      * Constructor.
@@ -136,9 +144,43 @@ public class KafkaCommitter extends AbstractMappedCommitter implements Watcher {
         this.brokerList = brokerList;
     }
 
+    /**
+     * Responsible to create the producer based
+     * on the parameters.
+     */
+    public KafkaProducer<String,String> getProducer() {
+        if (producer == null) {
+            Properties props = new Properties();
+            props.put("bootstrap.servers", getBrokerList());
+            props.put("acks", "all");
+            props.put("retries", 0);
+            props.put("batch.size", getCommitBatchSize());
+            props.put("linger.ms", 250);
+            props.put("buffer.memory", 1*1024*1024);
+            props.put("key.serializer", DFLT_KAFKA_SERIALIZER);
+            props.put("value.serializer", DFLT_KAFKA_SERIALIZER);
+            producer = new KafkaProducer<String,String>(props);
+        }
+        return producer;
+    }
+
     @Override
     protected void commitBatch(List<ICommitOperation> batch) {
-        throw new CommitterException("Not yet implemented");
+        for (ICommitOperation baseop : batch) {
+            // NOTE: Probably need a marshalling class here that is pluggable
+            if (baseop instanceof IAddOperation) { 
+                IAddOperation op = (IAddOperation) baseop;
+                ProducerRecord<String,String> oprec = new ProducerRecord<String,String> 
+                            (getTopicName(), op.getReference(), op.getReference());
+                producer.send(oprec);
+            } else
+            if (baseop instanceof IDeleteOperation) {
+                IDeleteOperation op = (IDeleteOperation) baseop;
+                ProducerRecord<String,String> oprec = new ProducerRecord<String,String> 
+                            (getTopicName(), op.getReference(), op.getReference());
+                producer.send(oprec);
+            }
+        }
     }
 
     @Override
