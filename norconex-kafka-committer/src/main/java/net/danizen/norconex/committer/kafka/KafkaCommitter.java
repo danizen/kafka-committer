@@ -29,6 +29,10 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
+import org.apache.zookeeper.Watcher;
+import org.apache.zookeeper.WatchedEvent;
+import org.apache.zookeeper.ZooKeeper;
+
 import com.norconex.committer.core.AbstractMappedCommitter;
 import com.norconex.committer.core.CommitterException;
 import com.norconex.committer.core.IAddOperation;
@@ -94,12 +98,13 @@ import com.norconex.commons.lang.map.Properties;
  * @author Pascal Dimassimo
  * @author Pascal Essiembre
  */
-public class KafkaCommitter extends AbstractMappedCommitter {
+public class KafkaCommitter extends AbstractMappedCommitter implements Watcher {
 
     private static final Logger logger = LogManager
             .getLogger(KafkaCommitter.class);
 
     private String topicName;
+    private String zkConnect;
     private String brokerList;
 
     /**
@@ -113,6 +118,14 @@ public class KafkaCommitter extends AbstractMappedCommitter {
 
     public void setTopicName(String topicName) {
         this.topicName = topicName;
+    }
+
+    public String getZkConnect() {
+        return zkConnect;
+    }
+
+    public void setZkConnect(String zkConnect) {
+        this.zkConnect = zkConnect;
     }
 
     public String getBrokerList() {
@@ -137,6 +150,12 @@ public class KafkaCommitter extends AbstractMappedCommitter {
 	        writer.writeEndElement();
         }
 
+        if (StringUtils.isNotBlank(zkConnect)) {
+            writer.writeStartElement("zkConnect");
+            writer.writeCharacters(zkConnect);
+            writer.writeEndElement();
+        }
+
         if (StringUtils.isNotBlank(brokerList)) {
             writer.writeStartElement("brokerList");
             writer.writeCharacters(brokerList);
@@ -147,6 +166,7 @@ public class KafkaCommitter extends AbstractMappedCommitter {
     @Override
     protected void loadFromXml(XMLConfiguration xml) {
         setTopicName(xml.getString("topicName", null));
+        setZkConnect(xml.getString("zkConnect", null));
         setBrokerList(xml.getString("brokerList", null));
     }
 
@@ -154,6 +174,7 @@ public class KafkaCommitter extends AbstractMappedCommitter {
     public int hashCode() {
         return new HashCodeBuilder().appendSuper(super.hashCode())
                 .append(topicName)
+                .append(zkConnect)
                 .append(brokerList)
                 .toHashCode();
     }
@@ -173,6 +194,7 @@ public class KafkaCommitter extends AbstractMappedCommitter {
         return new EqualsBuilder()
                 .appendSuper(super.equals(obj))
                 .append(topicName, other.topicName)
+                .append(zkConnect, other.zkConnect)
                 .append(brokerList, other.brokerList)
                 .isEquals();
     }
@@ -181,7 +203,13 @@ public class KafkaCommitter extends AbstractMappedCommitter {
     public String toString() {
         return new ToStringBuilder(this).appendSuper(super.toString())
                 .append("topicName", topicName)
+                .append("zkConnect", zkConnect)
                 .append("brokerList", brokerList)
                 .toString();
+    }
+
+    // required by interface Watcher
+    public void process(WatchedEvent event) {
+        // DO NOTHING
     }
 }

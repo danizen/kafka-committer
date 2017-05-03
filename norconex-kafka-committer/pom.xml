@@ -52,18 +52,23 @@
 
   <dependencies>
     <dependency>
-        <!-- 
-           This version is chosen as the oldest one in which the dependency will work.
-           see https://cwiki.apache.org/confluence/display/KAFKA/0.8.0+Producer+Example
-        -->
-        <groupId>org.apache.kafka</groupId>
-        <artifactId>kafka-clients</artifactId>
-        <version>0.8.2.1</version>
+      <!--
+         This version is chosen as the oldest one in which the dependency will work.
+         see https://cwiki.apache.org/confluence/display/KAFKA/0.8.0+Producer+Example
+      -->
+      <groupId>org.apache.kafka</groupId>
+      <artifactId>kafka-clients</artifactId>
+      <version>0.8.2.1</version>
     </dependency>
     <dependency>
-        <groupId>com.norconex.collectors</groupId>
-        <artifactId>norconex-committer-core</artifactId>
-        <version>2.0.5</version>
+      <groupId>com.norconex.collectors</groupId>
+      <artifactId>norconex-committer-core</artifactId>
+      <version>2.0.5</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.zookeeper</groupId>
+      <artifactId>zookeeper</artifactId>
+      <version>3.4.6</version>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
