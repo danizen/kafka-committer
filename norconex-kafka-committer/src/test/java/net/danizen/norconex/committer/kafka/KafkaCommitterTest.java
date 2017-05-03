@@ -23,7 +23,7 @@ import org.apache.log4j.Level;
 import org.junit.Assert;
 import org.junit.Test;
 
-//import com.norconex.commons.lang.config.XMLConfigurationUtil;
+import com.norconex.commons.lang.config.XMLConfigurationUtil;
 //import com.norconex.commons.lang.log.CountingConsoleAppender;
 
 //https://www.elastic.co/guide/en/elasticsearch/reference/current/integration-tests.html
@@ -39,8 +39,27 @@ import org.junit.Test;
 // Uncomment this class for good when no longer an issue in a future Elasticsearch
 
 public class KafkaCommitterTest {
+
     @Test
-    public void testStub() {
-        Assert.assertTrue("Stub condition is true", true);
+    public void testWriteRead() throws IOException {
+        KafkaCommitter committer = new KafkaCommitter();
+
+        // general committer configuration
+        committer.setQueueDir("my-queue-dir");
+        committer.setSourceContentField("sourceContentField");
+        committer.setTargetContentField("targetContentField");
+        committer.setSourceReferenceField("idField");
+        committer.setKeepSourceContentField(true);
+        committer.setKeepSourceReferenceField(false);
+        committer.setQueueSize(10);
+        committer.setCommitBatchSize(1);
+
+        // kafka committer fields
+        committer.setTopicName("test");
+        committer.setBrokerList("localhost:9128");
+        committer.setZkConnect("localhost:2181");
+
+        System.out.println("Writing/Reading this: "+committer);
+        XMLConfigurationUtil.assertWriteRead(committer);
     }
 }
