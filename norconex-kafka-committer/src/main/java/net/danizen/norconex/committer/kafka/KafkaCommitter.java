@@ -30,10 +30,6 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
-import org.apache.zookeeper.Watcher;
-import org.apache.zookeeper.WatchedEvent;
-import org.apache.zookeeper.ZooKeeper;
-
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerRecord;
 
@@ -102,7 +98,7 @@ import com.norconex.committer.core.IDeleteOperation;
  * @author Pascal Dimassimo
  * @author Pascal Essiembre
  */
-public class KafkaCommitter extends AbstractMappedCommitter implements Watcher {
+public class KafkaCommitter extends AbstractMappedCommitter {
 
     private static final Logger logger = LogManager
             .getLogger(KafkaCommitter.class);
@@ -111,7 +107,6 @@ public class KafkaCommitter extends AbstractMappedCommitter implements Watcher {
         "org.apache.kafka.common.serialization.StringSerializer";
 
     private String topicName;
-    private String zkConnect;
     private String brokerList;
     private KafkaProducer<String,String> producer;
 
@@ -128,14 +123,6 @@ public class KafkaCommitter extends AbstractMappedCommitter implements Watcher {
         this.topicName = topicName;
     }
 
-    public String getZkConnect() {
-        return zkConnect;
-    }
-
-    public void setZkConnect(String zkConnect) {
-        this.zkConnect = zkConnect;
-    }
-
     public String getBrokerList() {
         return brokerList;
     }
@@ -148,7 +135,7 @@ public class KafkaCommitter extends AbstractMappedCommitter implements Watcher {
      * Responsible to create the producer based
      * on the parameters.
      */
-    public KafkaProducer<String,String> getProducer() {
+    public KafkaProducer<String,String> createProducer() {
         if (producer == null) {
             Properties props = new Properties();
             props.put("bootstrap.servers", getBrokerList());
@@ -192,12 +179,6 @@ public class KafkaCommitter extends AbstractMappedCommitter implements Watcher {
 	        writer.writeEndElement();
         }
 
-        if (StringUtils.isNotBlank(zkConnect)) {
-            writer.writeStartElement("zkConnect");
-            writer.writeCharacters(zkConnect);
-            writer.writeEndElement();
-        }
-
         if (StringUtils.isNotBlank(brokerList)) {
             writer.writeStartElement("brokerList");
             writer.writeCharacters(brokerList);
@@ -208,7 +189,6 @@ public class KafkaCommitter extends AbstractMappedCommitter implements Watcher {
     @Override
     protected void loadFromXml(XMLConfiguration xml) {
         setTopicName(xml.getString("topicName", null));
-        setZkConnect(xml.getString("zkConnect", null));
         setBrokerList(xml.getString("brokerList", null));
     }
 
@@ -216,7 +196,6 @@ public class KafkaCommitter extends AbstractMappedCommitter implements Watcher {
     public int hashCode() {
         return new HashCodeBuilder().appendSuper(super.hashCode())
                 .append(topicName)
-                .append(zkConnect)
                 .append(brokerList)
                 .toHashCode();
     }
@@ -236,7 +215,6 @@ public class KafkaCommitter extends AbstractMappedCommitter implements Watcher {
         return new EqualsBuilder()
                 .appendSuper(super.equals(obj))
                 .append(topicName, other.topicName)
-                .append(zkConnect, other.zkConnect)
                 .append(brokerList, other.brokerList)
                 .isEquals();
     }
@@ -245,13 +223,7 @@ public class KafkaCommitter extends AbstractMappedCommitter implements Watcher {
     public String toString() {
         return new ToStringBuilder(this).appendSuper(super.toString())
                 .append("topicName", topicName)
-                .append("zkConnect", zkConnect)
                 .append("brokerList", brokerList)
                 .toString();
-    }
-
-    // required by interface Watcher
-    public void process(WatchedEvent event) {
-        // DO NOTHING
     }
 }

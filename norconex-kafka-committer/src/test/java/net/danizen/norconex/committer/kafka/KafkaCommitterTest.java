@@ -57,7 +57,6 @@ public class KafkaCommitterTest {
         // kafka committer fields
         committer.setTopicName("test");
         committer.setBrokerList("localhost:9128");
-        committer.setZkConnect("localhost:2181");
 
         System.out.println("Writing/Reading this: "+committer);
         XMLConfigurationUtil.assertWriteRead(committer);
