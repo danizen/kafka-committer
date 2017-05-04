@@ -38,7 +38,6 @@ import com.norconex.committer.core.CommitterException;
 import com.norconex.committer.core.IAddOperation;
 import com.norconex.committer.core.ICommitOperation;
 import com.norconex.committer.core.IDeleteOperation;
-//import com.norconex.commons.lang.map.Properties;
 
 /**
  * <p>

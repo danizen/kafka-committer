@@ -24,7 +24,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import com.norconex.commons.lang.config.XMLConfigurationUtil;
-//import com.norconex.commons.lang.log.CountingConsoleAppender;
+import com.norconex.commons.lang.log.CountingConsoleAppender;
 
 //https://www.elastic.co/guide/en/elasticsearch/reference/current/integration-tests.html
 // 
@@ -60,5 +60,19 @@ public class KafkaCommitterTest {
 
         System.out.println("Writing/Reading this: "+committer);
         XMLConfigurationUtil.assertWriteRead(committer);
+    }
+
+    @Test
+    public void testValidation() throws IOException {
+        CountingConsoleAppender appender = new CountingConsoleAppender();
+        appender.startCountingFor(XMLConfigurationUtil.class, Level.WARN);
+        try (Reader r = new InputStreamReader(getClass().getResourceAsStream(
+                ClassUtils.getShortClassName(getClass()) + ".xml"))) {
+            XMLConfigurationUtil.newInstance(r);
+        } finally {
+            appender.stopCountingFor(XMLConfigurationUtil.class);
+        }
+        Assert.assertEquals("Validation warnings/errors were found.", 
+                0, appender.getCount());
     }
 }
