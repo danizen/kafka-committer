@@ -52,16 +52,11 @@ import java.util.Properties;
  * <h3>XML configuration usage:</h3>
  *
  * <pre>
- *  &lt;committer class="com.norconex.committer.elasticsearch.ElasticsearchCommitter"&gt;
- *      &lt;indexName&gt;(Name of the index to use)&lt;/indexName&gt;
- *      &lt;typeName&gt;(Name of the type to use)&lt;/typeName&gt;
- *      &lt;clusterName&gt;
- *         (Name of the ES cluster to join. Default is "elasticsearch".)
- *      &lt;/clusterName&gt;
- *      &lt;clusterHosts&gt;
- *      	(Comma delimited list of hosts to connect to join the cluster.
- *      	Default is "localhost".)
- *      &lt;/clusterHosts&gt;
+ *  &lt;committer class="net.danizen.norconex.committer.kafka.KafkaCommitter&gt;
+ *
+ *      &lt;brokerList&gt;...&lt;/brokerList&gt;
+ *      &lt;topicName&gt;...&lt;/topicName&gt;
+ *
  *      &lt;sourceReferenceField keep="[false|true]"&gt;
  *         (Optional name of field that contains the document reference, when
  *         the default document reference is not used.  The reference value
@@ -92,14 +87,16 @@ import java.util.Properties;
  *
  * @author Pascal Dimassimo
  * @author Pascal Essiembre
+ * @author Joseph Paulo Mantuano
  */
 public class KafkaCommitter extends AbstractMappedCommitter {
 
     private static final Logger logger = LogManager
             .getLogger(KafkaCommitter.class);
 
-    private static final String DFLT_KAFKA_SERIALIZER =
+    private static final String DEFAULT_KAFKA_SERIALIZER =
             "org.apache.kafka.common.serialization.StringSerializer";
+    private static final int DEFAULT_BUFFER_SIZE = 1024 * 1024;
 
     private String topicName;
     private String brokerList;
@@ -173,6 +170,7 @@ public class KafkaCommitter extends AbstractMappedCommitter {
         this.dotReplacement = dotReplacement;
     }
 
+
     /**
      * Responsible to create the producer based
      * on the parameters.
@@ -185,9 +183,9 @@ public class KafkaCommitter extends AbstractMappedCommitter {
             props.put("retries", 0);
             props.put("batch.size", getCommitBatchSize());
             props.put("linger.ms", 250);
-            props.put("buffer.memory", 1 * 1024 * 1024);
-            props.put("key.serializer", DFLT_KAFKA_SERIALIZER);
-            props.put("value.serializer", DFLT_KAFKA_SERIALIZER);
+            props.put("buffer.memory", DEFAULT_BUFFER_SIZE);
+            props.put("key.serializer", DEFAULT_KAFKA_SERIALIZER);
+            props.put("value.serializer", DEFAULT_KAFKA_SERIALIZER);
             producer = new KafkaProducer<String, String>(props);
         }
 
