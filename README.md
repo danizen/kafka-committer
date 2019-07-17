@@ -20,6 +20,8 @@ When used with a Norconex Collector, you can use the following XML to configure 
       <maxRetryWait>...</maxRetryWait>
     </committer>
     
+Tag Descriptions:    
+    
 | Tag           | Description   |
 | ------------- |:-------------:|
 | brokerList    | Comma delimited list of host URLs to connect to a Kafka Broker of Cluster |
